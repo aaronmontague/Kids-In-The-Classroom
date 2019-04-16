@@ -102,12 +102,19 @@ class StudentController {
 				if (newStudent.getMiddleName() != null)
 					student.setMiddleName(newStudent.getMiddleName());
 				
+				// Set activeRecord to true
+				newStudent.setActiveRecordTrue();
+				
 				return repository.save(student);
 			
 			})
 			// Create new Student with passed Id
 			.orElseGet(() -> {
 				newStudent.studentId = id;
+				
+				// Set activeRecord to true
+				newStudent.setActiveRecordTrue();
+				
 				return repository.save(newStudent);
 			});
 		//PUT updates occur outside the mapping
