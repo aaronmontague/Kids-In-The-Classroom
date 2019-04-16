@@ -1,6 +1,7 @@
 package com.example.kids_in_classroom;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Resource;
@@ -103,7 +104,7 @@ class StudentController {
 					student.setMiddleName(newStudent.getMiddleName());
 				
 				// Set activeRecord to true
-				newStudent.setActiveRecordTrue();
+				student.setActiveRecordTrue();
 				
 				return repository.save(student);
 			
@@ -124,10 +125,18 @@ class StudentController {
 				);
 	}
 
-	//TODO Change delete to MoveToInactive
 	@DeleteMapping("/students/{id}")
-	void deleteStudentById(@PathVariable Integer id) {
-		repository.deleteById(id);
+	String deleteStudentById(@PathVariable Integer id) {
+		// Find student
+		Student inactivatedStudent = repository.findById(id).get();
+		// Inactivate
+		inactivatedStudent.setActiveRecordFalse();
+		// Save
+		repository.save(inactivatedStudent);
+		
+		return "Student Record " + inactivatedStudent.studentId + " has been removed";
+		
+		//repository.deleteById(id);
 	}
 	
 	// Query Endpoints
