@@ -29,7 +29,7 @@ class StudentController {
 	@GetMapping("/students")
 	Resources<Resource<Student>> getAllStudents() {
 		List<Resource<Student>> listOfAllStudents = repository.findAll().stream()
-				.filter(singleStudent -> singleStudent.getActiveRecord() == true)
+				.filter(singleStudentActive -> singleStudentActive.getActiveRecord() == true)
 				.map(oneStudentInList -> new Resource<>(oneStudentInList,
 					linkTo(methodOn(StudentController.class).getSingleStudentById(oneStudentInList.studentId)).withSelfRel(),
 					linkTo(methodOn(StudentController.class).getAllStudents()).withRel("students")))
@@ -73,6 +73,7 @@ class StudentController {
 	Resource<Student> getSingleStudentById(@PathVariable Integer id) {
 
 		Student singleStudent = repository.findById(id)
+			.filter(singleStudentActive -> singleStudentActive.getActiveRecord() == true)
 			.orElseThrow(() -> new StudentNotFoundException(id));
 		
 		return new Resource<>(singleStudent,
@@ -94,6 +95,10 @@ class StudentController {
 		Student putStudent = repository.findById(id)
 			// Update Existing Student
 			.map(student -> {
+				// Check to see if student record is active, if not, return null
+				if (student.getActiveRecord() == false)
+					throw new StudentNotFoundException(id);
+				
 				if (newStudent.firstName != null)
 					student.firstName = newStudent.firstName;
 				if (newStudent.lastName != null)
@@ -123,12 +128,15 @@ class StudentController {
 				linkTo(methodOn(StudentController.class).getSingleStudentById(id)).withSelfRel(),
 				linkTo(methodOn(StudentController.class).getAllStudents()).withRel("students")
 				);
+		
 	}
 
 	@DeleteMapping("/students/{id}")
 	String deleteStudentById(@PathVariable Integer id) {
-		// Find student
+		// Find student, else throw error
 		Student inactivatedStudent = repository.findById(id).get();
+		if (inactivatedStudent.getActiveRecord() == false)
+			throw new StudentNotFoundException(id);
 		// Inactivate
 		inactivatedStudent.setActiveRecordFalse();
 		// Save
@@ -144,6 +152,8 @@ class StudentController {
 	@GetMapping("/students/fname/{firstName}")	
 	Resources<Resource<Student>> getAllStudentsByFirstName(@PathVariable String firstName) {
 		List<Resource<Student>> listOfAllStudentsByFirstName = repository.findByFirstName(firstName).stream()
+				// Check to see if student record is active
+				.filter(singleStudentActive -> singleStudentActive.getActiveRecord() == true)
 				.map(oneStudentInList -> new Resource<>(oneStudentInList,
 					linkTo(methodOn(StudentController.class).getSingleStudentById(oneStudentInList.studentId)).withSelfRel(),
 					linkTo(methodOn(StudentController.class).getAllStudents()).withRel("students")))
@@ -157,6 +167,8 @@ class StudentController {
 	@GetMapping("/students/lname/{lastName}")
 	Resources<Resource<Student>> getAllStudentsByLastName(@PathVariable String lastName) {
 		List<Resource<Student>> listOfAllStudentsByLastName = repository.findByLastName(lastName).stream()
+				// Check to see if student record is active
+				.filter(singleStudentActive -> singleStudentActive.getActiveRecord() == true)
 				.map(oneStudentInList -> new Resource<>(oneStudentInList,
 					linkTo(methodOn(StudentController.class).getSingleStudentById(oneStudentInList.studentId)).withSelfRel(),
 					linkTo(methodOn(StudentController.class).getAllStudents()).withRel("students")))
