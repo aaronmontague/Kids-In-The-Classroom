@@ -1,7 +1,6 @@
 package com.example.kids_in_classroom;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Resource;
@@ -30,6 +29,7 @@ class StudentController {
 	@GetMapping("/students")
 	Resources<Resource<Student>> getAllStudents() {
 		List<Resource<Student>> listOfAllStudents = repository.findAll().stream()
+				.filter(singleStudent -> singleStudent.getActiveRecord() == true)
 				.map(oneStudentInList -> new Resource<>(oneStudentInList,
 					linkTo(methodOn(StudentController.class).getSingleStudentById(oneStudentInList.studentId)).withSelfRel(),
 					linkTo(methodOn(StudentController.class).getAllStudents()).withRel("students")))

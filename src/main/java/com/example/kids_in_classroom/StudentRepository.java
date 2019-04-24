@@ -1,8 +1,6 @@
 package com.example.kids_in_classroom;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.hateoas.Resource;
-
 import java.util.List;
 
 interface StudentRepository extends JpaRepository<Student, Integer>{
